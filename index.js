@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
 const port = process.env.PORT || 5000;
@@ -28,13 +28,57 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+app.post('/assignment', async(req, res) =>{
+    const newAssignment = req.body;
+    console.log(newAssignment);
+    const result = await assignmentCollection.insertOne(newAssignment);
+    res.send(result);
+})
+
  const assignmentCollection = client.db('codeCrafterHub').collection('assignment');
 //  await assignmentCollection.insertMany([{namr:"test"}])
+// 
 app.get('/assignment', async(req, res) => {
     const cursor = assignmentCollection.find();
     const result = await cursor.toArray();
     res.send(result);
 })
+// Update Assignment
+app.get('/assignment/:id', async(req, res) =>{
+    const id = req.params.id;
+    const query = {_id: new ObjectId(id)}
+    const result = await assignmentCollection.findOne(query);
+    res.send(result);
+})
+//delete Assignment
+app.delete('/assignment/:id', async(req, res) =>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)}
+  const result = await assignmentCollection.deleteOne(query);
+  res.send(result);
+})
+
+//Update Assignment
+app.put('/assignment/:id', async(req, res) => {
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)}
+    const options = {upsert: true};
+    const updateAssignment =req.body;
+    const assignment = {
+        $set:{
+            title: updateAssignment.title,
+            marks: updateAssignment.marks,
+            difficulty: updateAssignment.difficulty,
+            thumbnailImageUrl: updateAssignment.thumbnailImageUrl,
+            description: updateAssignment.description,
+        }
+    }
+    
+    const result = await assignmentCollection.updateOne(filter, assignment, options);
+    res.send(result);
+})
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
