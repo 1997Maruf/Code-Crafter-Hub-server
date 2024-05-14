@@ -43,12 +43,21 @@ async function run() {
         res.send(result);
     })
 
+    //feetback
+    app.post("/feetback", async(req, res) => {
+        const submit = req.body;
+        console.log(submit);
+        const result = await feedbackCollection.insertOne(submit);
+        res.send(result);
+    })
+
     const assignmentCollection = client
       .db("codeCrafterHub")
       .collection("assignment");
     const submitAssignmentCollection = client
       .db("codeCrafterHub")
       .collection("submitAssignment");
+      const feedbackCollection = client.db("codeCrafterHub").collection("feetback");
     // await submitAssignmentCollection.insertMany([{ namr: "test" }]);
     // //
     // panding
@@ -74,6 +83,16 @@ async function run() {
         //     projection: {title:1, marks: 1 },
         // }
         const result = await assignmentCollection.findOne(query);
+        res.send(result);
+    })
+    //marks assignment
+    app.get("/submitAssignment/:id", async(req, res) =>{
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id)};
+        // const options = {
+        //     projection: {title:1, marks: 1 },
+        // }
+        const result = await submitAssignmentCollection.findOne(query);
         res.send(result);
     })
 
